@@ -1,0 +1,287 @@
+<meta charset="UTF-8">
+<style>
+	button {
+		background: #3333ff;
+		color: white;
+		font-weight: bold;
+		border: 1px solid transparent;
+		border-radius: 5px;
+		padding: 10px;
+	}
+</style>
+<canvas width="600px" height="400px"></canvas>
+<button>CHECK</button>
+<script>
+
+	var tela = document.querySelector("canvas");
+	var pincel = tela.getContext("2d");
+	var button = document.querySelector("button");
+	var bombasx = [];
+	var bombasy = [];
+	var qntdBombas;
+	var distanciax;
+	var distanciay;
+	var resultadox;
+	var resultadoy;
+	var repeat;
+	var bombasMarkX = [];
+	var bombasMarkY = [];	
+	var tamanho = 30;
+	var origemX = 100;
+	var origemY = 50;
+
+	function initialize(){
+	while (level != 'easy' && level != 'medium' && level != 'hard'){
+		var level = prompt("Selecione a dificuldade: [easy] [medium] [hard]");
+	}
+
+	if (level == 'easy'){
+		qntdBombas = 15;
+	}
+	if (level == 'medium'){
+		qntdBombas = 20;
+	}
+	if (level == 'hard'){
+		qntdBombas = 25;
+	}
+
+	
+	pincel.fillStroke = 'black';
+	pincel.strokeRect(100, 50, 400, 300);
+
+	pincel.fillStyle = 'black';
+	pincel.font = " 30px Georgia  ";
+	pincel.fillText('MineField', 240, 30);
+
+	pincel.font = "10px Georgia";
+	pincel.fillText('Project by: José Henrique Merlo', 100, 370);
+
+	bombasx = [];
+	bombasy = [];
+	campoMinado();
+	sorteiaBombas();
+	bombasMarkX = [];
+	bombasMarkY = [];
+	}
+
+	function verifica(x, y){
+		for (k=0; k<qntdBombas; k++){
+			if (bombasx[k] == x && bombasy[k] == y){
+				return 0;
+				break;
+			}
+		}
+		return 1;
+	}
+
+	function desenhaQuadrado(origemx, origemy, tamanho, cor){
+		pincel.fillStyle = cor;
+		pincel.fillRect(origemx, origemy, tamanho, tamanho);
+		pincel.fillStroke = 'black';
+		pincel.strokeRect(origemx, origemy, tamanho, tamanho);
+	}
+
+
+	function marcarBomba(){
+
+		var controle=0;
+
+		for (k=0; k<bombasMarkX.length; k++){
+			if (bombasMarkX[k] == resultadox && bombasMarkY[k] == resultadoy){
+				controle=1;
+			}
+		}
+
+		if (controle == 0){
+			bombasMarkX.push(resultadox);
+			bombasMarkY.push(resultadoy);
+			desenhaMarcador('red', 5);
+		}
+	}
+
+	function desmarcarBomba(){
+
+		for (k=0;k<bombasMarkX.length; k++){
+			if (bombasMarkX[k]==resultadox && bombasMarkY[k] == resultadoy){
+				bombasMarkX.splice(k,1);
+				bombasMarkY.splice(k,1);
+				desenhaMarcador('lightgrey', 10);
+			}
+		}
+
+	}
+
+	function vitoria(){
+	
+		var qntdCorreta = 0;
+		if (bombasMarkX.length == qntdBombas){
+			for (j=0; j<qntdBombas; j++){
+				for (p=0; p<qntdBombas; p++){
+					if (bombasMarkX[j] == (bombasx[p]+origemX-tamanho) && bombasMarkY[j] == (bombasy[p]+origemY-tamanho)){
+						qntdCorreta++;
+					}
+				}
+			}
+		}
+
+		if (qntdCorreta == bombasx.length){
+			alert('YOU WIN');
+			initialize();
+		}
+
+		else {
+			alert('Tá errado maluco!');
+		}
+
+	}
+
+	function desenhaMarcador(cor, raio){
+		pincel.fillStyle = cor;
+		pincel.beginPath();
+		pincel.arc(resultadox+(tamanho/2), resultadoy+(tamanho/2), raio, 0, 2*Math.PI);
+		pincel.fill();
+	}
+
+	function campoMinado(){
+		for (i=origemX; i<500; i +=tamanho){
+			for (k=origemY; k<350; k+=tamanho){
+				desenhaQuadrado(i, k, tamanho, 'lightgrey');
+				pincel.fillStroke = 'black';
+				pincel.strokeRect(i, k, tamanho, tamanho)
+			}
+		}
+	}
+
+
+	function sorteiaBombas(){
+		
+		for (i=0; i<qntdBombas; i++){
+			var x = Math.round(Math.random()*10)*tamanho+tamanho*2;
+			var y = Math.round(Math.random()*10)*tamanho;
+			while (x==0){
+				 x = Math.round(Math.random()*10)*tamanho+tamanho*2;
+			}
+			while (y==0){
+				y = Math.round(Math.random()*10)*tamanho;
+			}
+			repeat = verifica(x, y);
+
+			while (repeat == 0 || x==0 || y==0){
+				 x = Math.round(Math.random()*10)*tamanho+tamanho*2;
+				 y = Math.round(Math.random()*10)*tamanho;
+				 repeat = verifica(x,y);
+			}
+			if (repeat == 1){
+				bombasx.push(x);
+				bombasy.push(y);
+			}
+		}
+		console.log(bombasx, bombasy);
+	}
+
+	function cliqueQuadrado(evento){
+		var x = evento.layerX;
+		var y = evento.layerY;
+		console.log(resultadox, resultadoy);
+		//Definindo variáveis de interesse;
+		for (i=origemX; i<x-tamanho; i+=tamanho){
+			var incognitax = i;
+		}
+		if (x>origemX && x<origemX+tamanho){
+			incognitax=origemX-tamanho;
+		}
+		for (i=origemY; i<y-tamanho; i+=tamanho){
+			var incognitay = i;
+		}
+		if (y>origemY && y<origemY+tamanho){
+			incognitay = origemY-tamanho;
+		}
+			
+		distanciax = x-incognitax-tamanho;
+		distanciay = y-incognitay-tamanho;
+		resultadox = x-distanciax;
+		resultadoy = y-distanciay;
+
+		//Percorrendo o vetor de bombas para ver se o clique foi numa bomba ou não;
+		//ctrl.Key apaga e shift.Key marca;
+		for(i=0; i<qntdBombas; i++){
+			if (x<bombasx[i]+origemX && x>origemX+bombasx[i]-tamanho && y<bombasy[i] + origemY && y>bombasy[i]+origemY-tamanho){
+				if (evento.shiftKey == true){
+					marcarBomba();
+					break;
+				}
+				if(evento.ctrlKey == true){
+					desmarcarBomba();
+					break;
+				}
+				else{
+					alert('BOOM');
+					var quadradoCerto=0;
+					initialize();
+					break;
+				}
+			}
+			else {
+				var quadradoCerto=1;
+			}
+		}
+
+		if (quadradoCerto==1){
+		if (evento.shiftKey == true){
+			marcarBomba();
+		}
+		else {
+			if(evento.ctrlKey == true){
+			desmarcarBomba();
+			}
+			else{
+				if(resultadox<500 && resultadoy<350){
+					desenhaQuadrado(resultadox, resultadoy, tamanho, 'grey');
+					verificaBombas();
+				}
+			}
+		}
+		}
+	}
+
+
+	function verificaBombas(){
+
+		var numeroBombas=0;
+		
+		for (i=0; i<qntdBombas; i++){
+			if ((bombasx[i]==resultadox-70 && bombasy[i]==resultadoy-30-20) || (bombasx[i]==resultadox-70 && bombasy[i]==resultadoy+30-20) || (bombasx[i]==resultadox-30-70 && bombasy[i]==resultadoy-20) || (bombasx[i]==resultadox+30-70 && bombasy[i]==resultadoy-20) || (bombasx[i]==resultadox-30-70 && bombasy[i]==resultadoy-30-20) || (bombasx[i]==resultadox+30-70 && bombasy[i]==resultadoy-30-20) || (bombasx[i]==resultadox-30-70 && bombasy[i]==resultadoy+30-20) || (bombasx[i]==resultadox+30-70 && bombasy[i]==resultadoy+30-20)){
+				numeroBombas++;
+			}
+		}
+
+		if (numeroBombas > 0){
+			if (numeroBombas == 1){
+				pincel.font = "15px Georgia";
+				pincel.fillStyle = 'blue';
+				pincel.fillText(numeroBombas, resultadox+12, resultadoy+20);
+			}
+			if (numeroBombas == 2){
+				pincel.font = "15px Georgia";
+				pincel.fillStyle = 'green';
+				pincel.fillText(numeroBombas, resultadox+12, resultadoy+20);
+			}
+			if (numeroBombas == 3){
+				pincel.font = "15px Georgia";
+				pincel.fillStyle ='yellow';
+				pincel.fillText(numeroBombas, resultadox+12, resultadoy+20);
+			}
+
+			if (numeroBombas > 3){
+				pincel.font = "15px Georgia";
+				pincel.fillStyle ='red';
+				pincel.fillText(numeroBombas, resultadox+12, resultadoy+20);
+			}
+		}
+	}
+
+	initialize();
+	tela.onclick = cliqueQuadrado;
+	button.onclick = vitoria;
+
+</script>
